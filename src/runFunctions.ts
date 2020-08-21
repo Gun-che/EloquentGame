@@ -3,7 +3,6 @@ import { DOMDisplay } from "./Displays/DOMDisplay";
 import { State } from "./State";
 import { trackKeys } from './Listener'
 
-const arrowKeys = trackKeys(['ArrowLeft', 'ArrowRight', 'ArrowUp']);
 
 export function runAnimation(frameFunc: any) {
   let lastTime = null;
@@ -22,8 +21,35 @@ export function runLevel(level: Level, Display: typeof DOMDisplay) {
   let display = new Display(document.body, level);
   let state = State.start(level);
   let ending = 1;
+  let running: 'yes' | 'no' | 'pausing' = 'yes'
+  const arrowKeys = trackKeys(['ArrowLeft', 'ArrowRight', 'ArrowUp']);
+
   return new Promise(resolve => {
-    runAnimation(time => {
+    function escHandler(event: KeyboardEvent) {
+
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+
+      if (running === 'no') {
+        running = 'yes';
+        runAnimation(frame);
+
+      } else if (running = 'yes') {
+        running = 'pausing';
+
+      } else {
+        running = 'yes'
+      }
+    }
+    window.addEventListener('keydown', escHandler)
+
+    function frame(time: number) {
+
+      if (running === 'pausing') {
+        running = 'no';
+        return false;
+
+      }
       state = state.update(time, arrowKeys);
       display.syncState(state);
 
@@ -36,24 +62,29 @@ export function runLevel(level: Level, Display: typeof DOMDisplay) {
 
       } else {
         display.clear();
+        window.removeEventListener('keydown', escHandler);
+        arrowKeys.unregister();
         resolve(state.status);
         return false;
       }
-    });
+
+    }
+
+    runAnimation(frame);
   });
 }
 
 export async function runGame(plans: string[], Display: typeof DOMDisplay) {
-  let lifes = 5;
+  let lives = 5;
   for (let level = 0; level < plans.length;) {
     let status = await runLevel(new Level(plans[level]), Display);
     if (status === 'won') level++;
     if (status === 'lost') {
-      console.log(`${--lifes} жизней`);
-      if (lifes === 0) {
+      console.log(`${--lives} жизней`);
+      if (lives === 0) {
         console.log('ты проиграл');
         level = 0;
-        lifes = 5;
+        lives = 5;
       }
     }
   }
