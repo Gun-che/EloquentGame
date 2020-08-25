@@ -39,3 +39,5 @@ export const monsterSpeed = 4;
 export const gravity = 30;
 
 export const jumpSpeed = 17;
+
+export const playerXOverlap = 4;

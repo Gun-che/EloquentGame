@@ -2,6 +2,7 @@ import { Level } from "./Level";
 import { DOMDisplay } from "./Displays/DOMDisplay";
 import { State } from "./State";
 import { trackKeys } from './Listener'
+import { CanvasDisplay } from "./Displays/CanvasDisplay";
 
 
 export function runAnimation(frameFunc: any) {
@@ -17,7 +18,7 @@ export function runAnimation(frameFunc: any) {
   requestAnimationFrame(frame);
 };
 
-export function runLevel(level: Level, Display: typeof DOMDisplay) {
+export function runLevel(level: Level, Display: typeof DOMDisplay | typeof CanvasDisplay) {
   let display = new Display(document.body, level);
   let state = State.start(level);
   let ending = 1;
@@ -74,7 +75,7 @@ export function runLevel(level: Level, Display: typeof DOMDisplay) {
   });
 }
 
-export async function runGame(plans: string[], Display: typeof DOMDisplay) {
+export async function runGame(plans: string[], Display: typeof DOMDisplay | typeof CanvasDisplay) {
   let lives = 5;
   for (let level = 0; level < plans.length;) {
     let status = await runLevel(new Level(plans[level]), Display);
